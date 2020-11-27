@@ -1,17 +1,15 @@
-var table = [null, null, null, null, null, null, null, null, null];
-var blocker = false;
 
 function init(turn) {
     document.body.innerHTML = '';
-    draw_table();
+    draw_table.draw();
     if (turn == 2) {
-        cputurn(table);
+        cputurn(draw_table.table);
     }
 
 }
 
 function think(table) {
-    let winboard = [[0,4,8], [2,4,6], [0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8]];
+    const winboard = [[0,4,8], [2,4,6], [0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8]];
     let result = null;
     
     function doit(x, y) { // count x in array [x, x, x] return index of table
@@ -45,7 +43,7 @@ function think(table) {
 }
 
 function getmoves(table) {
-    var moves = [];
+    let moves = [];
     for (let i = 0; i < table.length; i++) {
         if (table[i] == null) {
             moves.push(i);
@@ -64,14 +62,14 @@ function onclickremove() {
 
 function cputurn(table) {
     //console.log(think(table));
-    let moves = getmoves(table);
-    blocker = true;
-    setTimeout(() => blocker = false, 1500);
+    let moves = getmoves(draw_table.table);
+    rotate.blocker = true;
+    setTimeout(() => rotate.blocker = false, 1500);
     if (moves != "") {
-        let a = think(table); //moves[Math.floor(Math.random() * moves.length)];
+        let a = think(draw_table.table); //moves[Math.floor(Math.random() * moves.length)];
         let b = document.getElementById(a);
         //rotate(b, 2);
-        setTimeout(() => rotate(b, 2), 1000);
+        setTimeout(() => rotate.doit(b, 2), 1000);
         
     } else setTimeout(() => sign("ROUND DRAW"), 1000);
 }
@@ -79,9 +77,9 @@ function cputurn(table) {
 
 function mouseclick() {
     let a = parseInt(this.id);
-    if (table[a] == null && blocker == false) {
-        blocker = true;
-        rotate(this, 1);        
+    if (draw_table.table[a] == null && rotate.blocker == false) {
+        rotate.blocker = true;
+        rotate.doit(this, 1);        
     } else return;
     
 }
@@ -97,8 +95,8 @@ function sign(words) {
 }
 
 function congrats(combination) {
-    let player = table[combination[0]];
-    combination.forEach(element => {
+    let player = draw_table.table[combination[0]];
+    combination.forEach(element => {    // make the bars darker
         document.getElementById("b" + element).style.backgroundColor = " rgb(255, 153, 57)";
     });
 
@@ -126,52 +124,62 @@ function makeit(type, id, cname, parent) {
     document.body.appendChild(elem))
 }
 
-function draw_table() {
+let draw_table = {
     
-    makeit("div", "canvas", "canvas");
+    table: [null, null, null, null, null, null, null, null, null],
 
-    for (let index = 0; index < 9; index ++) {
-
-        makeit("div", index, "wrapper", "canvas");
-        makeit("div", "c" + index, "card", index);
-        makeit("div", "f" + index, "front", "c" + index);
-        makeit("div", "b" + index, "back", "c" + index);            
-        document.getElementById(index).onclick = mouseclick;
-    }    
-    
-}
-
-function rotate (target, player) {
-
-    var a = parseInt(target.id);
-
-    if (player == 1) {
+    draw: function () {
         
-        table[a] = 1; // Players turn
-        target.querySelector(".back").style.backgroundImage="url('svg/cros.svg')";
-        target.querySelector(".front").style.transform = "rotateY(180deg)";
-        target.querySelector(".back").style.transform = "rotateY(360deg)";
+        makeit("div", "canvas", "canvas");
 
-    } else {
-        
-        table[a] = 2; // cpu turn
-        target.querySelector(".back").style.backgroundImage="url('svg/circle.svg')";
-        target.querySelector(".front").style.transform = "rotateY(180deg)";
-        target.querySelector(".back").style.transform = "rotateY(360deg)";
+        for (let index = 0; index < 9; index ++) {
+
+            makeit("div", index, "wrapper", "canvas");
+            makeit("div", "c" + index, "card", index);
+            makeit("div", "f" + index, "front", "c" + index);
+            makeit("div", "b" + index, "back", "c" + index);            
+            document.getElementById(index).onclick = mouseclick;
+        }    
         
     }
 
-    isitwin(table, player);
+}
+
+let rotate = {
     
+    blocker: false,
+
+    doit: function (target, player) {
+
+        let a = parseInt(target.id);
+
+        if (player == 1) {
+            
+            draw_table.table[a] = 1; // Players turn
+            target.querySelector(".back").style.backgroundImage="url('svg/cros.svg')";
+            target.querySelector(".front").style.transform = "rotateY(180deg)";
+            target.querySelector(".back").style.transform = "rotateY(360deg)";
+
+        } else {
+            
+            draw_table.table[a] = 2; // cpu turn
+            target.querySelector(".back").style.backgroundImage="url('svg/circle.svg')";
+            target.querySelector(".front").style.transform = "rotateY(180deg)";
+            target.querySelector(".back").style.transform = "rotateY(360deg)";
+            
+        }
+
+        isitwin(draw_table.table, player);
+        
+    }
+
 }
 
 function isitwin(table, player) {
     
-    var winboard = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]];
+    const winboard = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]];
     
-    for (let i = 0; i < winboard.length; i++) {
-
-        let j = winboard[i];
+    for (const j of winboard) {
         
         if (table[j[0]] == table[j[1]] && table[j[1]] == table[j[2]] && table[j[2]]  == player) {
             congrats(j);
@@ -181,8 +189,7 @@ function isitwin(table, player) {
     }
     
     if (player == 1 || player == "1") {
-        cputurn(table);
+        cputurn(draw_table.table);
     } 
         
 }
-
