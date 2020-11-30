@@ -54,9 +54,9 @@
   /*display: flex;
   justify-content: center;*/
   margin: 20px 20px 20px;
-  background-color: orangered;
+  background-color:rgb(255, 187, 110);
   padding: 10px 30px;
-  border-radius: 20px;
+  border-radius: 10px;
   min-width: 130px;
   font-family: 'Montserrat', sans-serif;
   font-size: 20px;
